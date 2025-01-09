@@ -1,15 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import { io } from 'socket.io-client';
+import axios from "./axios";
 
 function App() {
   const [count, setCount] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [otpData, setOtpData] = useState("");
+  const [token, setToken] = useState("")
 
   const socket = io("http://localhost:8080"); // URL backend Anda
+
+  useEffect(() => {
+    const tkn = `token${Date.now()}`
+    setToken(tkn)
+  }, [])
 
   socket.on("reichiveOTP", (data) => {
     // console.log(data);
@@ -23,8 +30,12 @@ function App() {
     setIsModalOpen(false); // Tampilkan modal
   });
 
-  const buttonHandler = () => {
-    fetch('http://localhost:8080/otp')
+  const buttonHandler = async () => {
+    socket.emit('joinRoom', token)
+    const dt = {
+      token
+    }
+    await axios.post('/otp', dt)
   }
 
   return (
